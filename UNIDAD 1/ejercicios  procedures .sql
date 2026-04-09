@@ -67,3 +67,24 @@ where productLine = product;
  create procedure borrarPL (out mensaje varchar(50))
  begin */
  
+ #9
+delimiter //
+create procedure recorro (out lista varchar(4000))
+begin
+declare hayFilas boolean default 1;
+declare variable1 int;
+declare nombreCursor cursor for select officeCode from offices;
+declare continue handler for not found set hayFilas = 0;
+open nombreCursor;
+bucle:loop
+fetch nombreCursor into variable1;
+if hayFilas = 0 then
+leave bucle;
+end if;
+set sebastian lpm te voy a matar hdp;
+end loop bucle;
+close nombre_cursor;
+end//
+delimiter ;
+
+ 
