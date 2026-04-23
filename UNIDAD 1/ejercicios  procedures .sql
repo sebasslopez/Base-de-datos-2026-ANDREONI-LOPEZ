@@ -116,7 +116,8 @@ end loop bucle;
 close nombreCursor;
 end//
 delimiter ;
- 
+
+#11
 delimiter //
 CREATE PROCEDURE alterCommentOrder(IN p_customerNumber INT)
 BEGIN
@@ -130,7 +131,7 @@ BEGIN
       AND (o.comments IS NULL OR o.comments = '');
 END //
 
-
+#13
 CREATE PROCEDURE actualizarComision()
 BEGIN
     UPDATE employees e
@@ -149,6 +150,7 @@ BEGIN
     END;
 END //
 
+#14
 CREATE PROCEDURE asignarEmpleados()
 BEGIN
     DECLARE v_emp_id INT;
@@ -167,4 +169,64 @@ BEGIN
     WHERE salesRepEmployeeNumber IS NULL;
 END //
 delimiter ;
+
+#3
+delimiter //
+create procedure borrarProductLines(IN line int)
+begin
+if(productosEnLine(line) = 0) then
+delete from productlines p
+where line = p.producLine;
+select "La línea de productos fue borrada.";
+else
+select "La línea de productos no pudo borrarse porque contiene productos asociados.";
+end if;
+end//
+delimiter ;
+
+#4
+delimiter //
+create procedure listarPorEstado()
+begin
+select count(*) from orders
+group by status;
+end//
+delimiter ;
+
+#6
+delimiter //
+create procedure listarOrdenes()
+begin
+select orderNumber,sum(quantityOrdered * priceEach) from orderdetails
+group by orderNumber;
+end//
 */
+
+#reporte ventas
+delimiter //
+create procedure insertReportesVentas()
+begin
+declare hayFilas boolean default 1;
+declare variable1 int;
+declare nombreCursor cursor for select o.orderNumber,o.status,timediff(DAY,o.shippedDate,o.requiredDate),c.customerName,c.country, from orders o
+join customers c on c.customerNumber = o.customerNumber;
+declare continue handler for not found set hayFilas = 0;
+open nombreCursor;
+bucle:loop
+fetch nombreCursor into variable1;
+if hayFilas = 0 then
+leave bucle;
+end if;
+insert into cancelledOrders values(
+nombreCursor.orderNumber,
+nombreCursor.orderDate,
+nombreCursor.rrequiredDate,
+nombreCursor.shippedDate,
+nombreCursor.status,
+nombreCursor.comments,
+nombreCursor.customerNumber
+);
+end loop bucle;
+close nombreCursor;
+end//
+delimiter ;

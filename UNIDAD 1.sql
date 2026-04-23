@@ -1,3 +1,4 @@
+/*
 #1
 delimiter //
 create function pagada (compra int) returns boolean deterministic 
@@ -59,3 +60,4 @@ create view resvenmes as select m.id,count(c.id), sum(p.monto), autos(m.id) from
 join pago p on compra_id=c.id
 join auto a on auto_patente=a.patente
 join modelo m on m.id=modelo_id;
+*/

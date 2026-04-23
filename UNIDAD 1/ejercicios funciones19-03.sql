@@ -36,12 +36,24 @@ join customers c on e.employeeNumber = c.salesRepEmployeeNumber
  end;
  // delimiter;*/
  
- #10
+ #4
  delimiter //
- create function pedro (pcod int) returns float deterministic
+ create function productosEnLine(id int) returns int deterministic
  begin
+declare cant int default 0;
+select count(*) into cant from products p
+where p.productLine = id;
+return cant;
+ end//
  
- select  
+ delimiter //
+ create function productosCompra(id int) returns int deterministic
+ begin
+declare cant int default 0;
+select count(*) into cant from orderdetails p
+where p.orderNumber = id;
+return cant;
+ end//
  
  
  
