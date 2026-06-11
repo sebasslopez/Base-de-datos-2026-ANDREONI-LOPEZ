@@ -1,0 +1,2 @@
+Los ejercicios que hicimos de seguridad, no lo subimos al repo y quedó en la compu del cole, mañana (viernes 12), hacemos un commit subiendolos, no nos mates porfis :)
+pd: tienen cosas que consideramos importantes y por eso no quise rehacerlos :D 
