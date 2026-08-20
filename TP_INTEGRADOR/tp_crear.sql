@@ -1,3 +1,4 @@
+#create database tp;
 
 CREATE TABLE usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
@@ -5,7 +6,7 @@ CREATE TABLE usuarios (
     apellido VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    nivel ENUM('NORMAL', 'PLATINUM', 'GOLD') DEFAULT 'NORMAL', #Se guarda como dato en usuario y se calcula cada cierto tiempo para mantenerlo actualizado, porque sino se debería calcularlo cada vez que se requiera.
+    nivel ENUM('NORMAL', 'PLATINUM', 'GOLD','NONE') DEFAULT 'NONE', #Se guarda como dato en usuario y se calcula cada cierto tiempo para mantenerlo actualizado, porque sino se debería calcularlo cada vez que se requiera.
     reputacion DECIMAL(5,2) DEFAULT 0.00, #Yo diría que sea un dato en usuario. El cual se actualiza cada cierto tiempo o cada que se realiza una transaccion, si fuese un calculo en lugar de un dato guardado, se tendría que calcular la reputacion cada que se requiera.
     cantidad_ventas INT DEFAULT 0,
     facturacion DECIMAL(15,2) DEFAULT 0.00,

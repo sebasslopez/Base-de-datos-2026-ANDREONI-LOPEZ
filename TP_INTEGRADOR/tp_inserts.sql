@@ -1,4 +1,4 @@
-/*INSERT INTO usuarios
+INSERT INTO usuarios
 (id_usuario, nombre, apellido, email, password, nivel, reputacion, cantidad_ventas, facturacion)
 VALUES
 (1, 'Juan', 'Gomez', 'juan.gomez@mail.com', 'pass123', 'NORMAL', 72.50, 5, 42500.00),
@@ -390,7 +390,7 @@ VALUES
 (47, 47, 48, '¿La pelota es tamaño profesional?', '2026-07-24 11:30:00'),
 (48, 48, 49, '¿La raqueta incluye funda?', '2026-07-24 15:20:00'),
 (49, 49, 50, '¿La bicicleta tiene cambios?', '2026-07-25 10:30:00'),
-(50, 50, 51, '¿Las mancuernas son regulables?', '2026-07-25 17:10:00');
+(50, 50, 51, '¿Las mancuernas son regulables?', '2026-07-25 17:10:00'),
 (51, 51, 52, '¿Cuántas herramientas incluye el set?', '2026-07-26 12:00:00'),
 (52, 52, 53, '¿El taladro incluye batería?', '2026-07-26 16:30:00'),
 (53, 53, 54, '¿El destornillador es recargable?', '2026-07-27 11:10:00'),
@@ -420,13 +420,13 @@ VALUES
 (77, 77, 78, '¿Qué capacidad tiene el baúl?', '2026-08-08 10:15:00'),
 (78, 78, 79, '¿Los espejos son universales?', '2026-08-08 14:40:00'),
 (79, 79, 80, '¿La cortadora tiene bolsa recolectora?', '2026-08-09 11:00:00'),
-(80, 80, 81, '¿Cuántos metros tiene la manguera?', '2026-08-09 16:20:00');
+(80, 80, 81, '¿Cuántos metros tiene la manguera?', '2026-08-09 16:20:00'),
 #(81, 81, 82, '¿La maceta sirve para exterior?', '2026-08-10 10:30:00'),
 (82, 82, 83, '¿Qué herramientas incluye el kit?', '2026-08-10 14:50:00'),
 (83, 83, 84, '¿Los cuchillos son de acero inoxidable?', '2026-08-11 11:20:00'),
 (84, 84, 85, '¿La olla tiene tapa?', '2026-08-11 15:30:00'),
 (85, 85, 86, '¿La sartén funciona en cocina de inducción?', '2026-08-12 10:40:00'),
-(86, 86, 87, '¿La batidora tiene varios accesorios?', '2026-08-12 14:20:00');
+(86, 86, 87, '¿La batidora tiene varios accesorios?', '2026-08-12 14:20:00'),
 (87, 87, 88, '¿El perfume es original?', '2026-08-13 09:00:00'),
 (88, 88, 89, '¿El set de maquillaje está cerrado?', '2026-08-13 09:15:00'),
 (89, 89, 90, '¿El secador tiene diferentes temperaturas?', '2026-08-13 09:30:00'),
@@ -440,7 +440,7 @@ VALUES
 (97, 97, 98, '¿El disco externo funciona con Windows?', '2026-08-13 10:30:00'),
 (98, 98, 99, '¿El adaptador tiene entrada HDMI?', '2026-08-13 10:35:00'),
 (99, 99, 100, '¿Cuántos puertos tiene el hub USB?', '2026-08-13 10:40:00'),
-(100, 100, 1, '¿El soporte para notebook es regulable?', '2026-08-13 10:45:00');*/
+(100, 100, 1, '¿El soporte para notebook es regulable?', '2026-08-13 10:45:00');
 
 INSERT INTO subastas
 (id_publicacion, oferta_maxima, id_usuario_ofertante)
