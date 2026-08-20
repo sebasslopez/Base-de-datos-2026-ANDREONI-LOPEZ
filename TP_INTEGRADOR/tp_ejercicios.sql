@@ -1,8 +1,8 @@
 
-#CREATE INDEX idx_productos_nombre ON productos(nombre);
-#CREATE UNIQUE INDEX idx_usuarios_email ON usuarios(email);
-#CREATE INDEX idx_publicaciones_estado_fecha ON publicaciones(estado, fecha_publicacion);
-#CREATE INDEX idx_publicaciones_estado_finalizacion ON publicaciones(estado, fecha_finalizacion);
+CREATE INDEX idx_productos_nombre ON productos(nombre);
+CREATE UNIQUE INDEX idx_usuarios_email ON usuarios(email);
+CREATE INDEX idx_publicaciones_estado_fecha ON publicaciones(estado, fecha_publicacion);
+CREATE INDEX idx_publicaciones_estado_finalizacion ON publicaciones(estado, fecha_finalizacion);
 
 DELIMITER $$
 
