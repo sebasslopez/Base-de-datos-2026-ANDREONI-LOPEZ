@@ -36,7 +36,7 @@ CREATE TABLE publicaciones (
     id_usuario_vendedor INT NOT NULL,
     precio DECIMAL(15,2) NOT NULL,
     nivel_publicacion ENUM('BRONCE', 'PLATA', 'ORO', 'PLATINO') NOT NULL DEFAULT 'BRONCE', #yo diría que sea un campo de publicacion. Esto para que sea más facil el ordenarlos segun el nivel de publicacion. Osea que no se tenga que acceder a otra tabla por cada publicacion para obtener un solo valor.
-    estado ENUM('ACTIVA', 'FINALIZADA') NOT NULL DEFAULT 'ACTIVA',
+    estado ENUM('ACTIVA','PAUSADA','FINALIZADA','OBSERVADA') NOT NULL DEFAULT 'ACTIVA',
     fecha_publicacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_finalizacion DATETIME NULL,
     FOREIGN KEY (id_producto) REFERENCES productos(id_producto),

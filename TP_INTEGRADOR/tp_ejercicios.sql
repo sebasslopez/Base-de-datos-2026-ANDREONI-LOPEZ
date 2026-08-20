@@ -1,17 +1,14 @@
-ALTER TABLE publicaciones
-MODIFY estado ENUM('ACTIVA','PAUSADA','FINALIZADA','OBSERVADA') NOT NULL DEFAULT 'ACTIVA',
-ADD COLUMN medio_pago ENUM('TARJETA_CREDITO','TARJETA_DEBITO','PAGO_FACIL','RAPIPAGO') NULL;
 
-CREATE INDEX idx_productos_nombre ON productos(nombre);
-CREATE UNIQUE INDEX idx_usuarios_email ON usuarios(email);
-CREATE INDEX idx_publicaciones_estado_fecha ON publicaciones(estado, fecha_publicacion);
-CREATE INDEX idx_publicaciones_estado_finalizacion ON publicaciones(estado, fecha_finalizacion);
+#CREATE INDEX idx_productos_nombre ON productos(nombre);
+#CREATE UNIQUE INDEX idx_usuarios_email ON usuarios(email);
+#CREATE INDEX idx_publicaciones_estado_fecha ON publicaciones(estado, fecha_publicacion);
+#CREATE INDEX idx_publicaciones_estado_finalizacion ON publicaciones(estado, fecha_finalizacion);
 
 DELIMITER $$
 
 DROP FUNCTION IF EXISTS tiempo_promedio_venta$$
 CREATE FUNCTION tiempo_promedio_venta(p_id_usuario INT)
-RETURNS INT
+RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE v_promedio INT;
 
@@ -44,7 +41,7 @@ END$$
 
 DROP FUNCTION IF EXISTS porcentaje_ventas$$
 CREATE FUNCTION porcentaje_ventas(p_id_usuario INT)
-RETURNS INT
+RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE v_total INT;
     DECLARE v_concretadas INT;
@@ -70,7 +67,7 @@ END$$
 
 DROP FUNCTION IF EXISTS mayor_puja$$
 CREATE FUNCTION mayor_puja(p_id_publicacion INT)
-RETURNS INT
+RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE v_es_subasta INT;
     DECLARE v_oferta INT;
@@ -94,7 +91,7 @@ END$$
 
 DROP FUNCTION IF EXISTS precio_promedio_categoria$$
 CREATE FUNCTION precio_promedio_categoria(p_id_categoria INT)
-RETURNS INT
+RETURNS INT DETERMINISTIC
 
 BEGIN
     DECLARE v_promedio INT;
@@ -109,7 +106,7 @@ END$$
 
 DROP FUNCTION IF EXISTS ultima_compra$$
 CREATE FUNCTION ultima_compra(p_id_usuario INT)
-RETURNS DATETIME
+RETURNS DATETIME DETERMINISTIC
 BEGIN
     DECLARE v_fecha DATETIME;
 
@@ -496,14 +493,7 @@ BEGIN
         SET cantidad_ventas = cantidad_ventas + 1,
             facturacion = facturacion + NEW.monto
         WHERE id_usuario = NEW.id_usuario_vendedor;
-
-        IF (SELECT cantidad_ventas FROM usuarios WHERE id_usuario = NEW.id_usuario_vendedor) >= 10 THEN
-            UPDATE usuarios SET nivel = 'PLATINUM' WHERE id_usuario = NEW.id_usuario_vendedor;
-        ELSEIF (SELECT cantidad_ventas FROM usuarios WHERE id_usuario = NEW.id_usuario_vendedor) >= 5 THEN
-            UPDATE usuarios SET nivel = 'GOLD' WHERE id_usuario = NEW.id_usuario_vendedor;
-        ELSE
-            UPDATE usuarios SET nivel = 'NORMAL' WHERE id_usuario = NEW.id_usuario_vendedor;
-        END IF;
+        call actualizar_nivel(new.id_usuario_vendedor,@var1,@var2);
     END IF;
 END$$
 
