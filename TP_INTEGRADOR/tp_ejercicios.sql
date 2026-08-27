@@ -12,7 +12,7 @@ RETURNS INT DETERMINISTIC
 BEGIN
     DECLARE v_promedio INT;
 
-    SELECT AVG(TIMESTAMPDIFF(SECOND, p.fecha_publicacion, t.fecha_transaccion)) / 86400
+    SELECT AVG(TIMESTAMPDIFF(HOUR , p.fecha_publicacion, t.fecha_transaccion))
     INTO v_promedio
     FROM publicaciones p
     JOIN transacciones t ON t.id_publicacion = p.id_publicacion
@@ -51,16 +51,15 @@ BEGIN
     FROM publicaciones
     WHERE id_usuario_vendedor = p_id_usuario;
 
-    IF v_total = 0 THEN
-        RETURN 0;
-    END IF;
+    if(v_total = 0) then
+        return 0;
+    end if ;
 
     SELECT COUNT(*)
     INTO v_concretadas
-    FROM transacciones t
-     JOIN publicaciones p ON p.id_publicacion = t.id_publicacion
-    WHERE p.id_usuario_vendedor = p_id_usuario
-      AND t.estado = 'CONCRETADA';
+    FROM publicaciones p
+    JOIN transacciones t ON t.id_publicacion = p.id_publicacion
+    WHERE p.id_usuario_vendedor = 1 AND t.estado = 'CONCRETADA';
 
     RETURN v_concretadas * 100.0 / v_total;
 END$$
@@ -321,13 +320,14 @@ BEGIN
         SELECT u.id_usuario AS usuario,
                u.email,
                pr.nombre AS producto,
-               IF(s.id_usuario_ofertante IS NULL, 0, 1) AS cantidad_oferentes,
+               #Es probable que la cantidad de oferentes de 0 porque subastas_update_audit no tiene nada.
+               (select count(*) from subastas_update_audit where id_subasta = s.id_publicacion) AS cantidad_oferentes,
                p.precio AS valor_inicial,
                IFNULL(s.oferta_maxima, 0) AS valor_ganador
         FROM subastas s
-         JOIN publicaciones p ON p.id_publicacion = s.id_publicacion
-         JOIN productos pr ON pr.id_producto = p.id_producto
-        LEFT JOIN usuarios u ON u.id_usuario = s.id_usuario_ofertante
+        JOIN publicaciones p ON p.id_publicacion = s.id_publicacion
+        JOIN productos pr ON pr.id_producto = p.id_producto
+        JOIN usuarios u ON u.id_usuario = s.id_usuario_ofertante
         WHERE s.id_publicacion = p_id_publicacion;
 
         SET p_ok = 1;
@@ -511,6 +511,8 @@ BEGIN
     WHERE u.id_usuario = NEW.id_usuario_calificado;
 END$$
 
+
+
 DROP TRIGGER IF EXISTS puja$$
 CREATE TRIGGER puja
 BEFORE UPDATE ON subastas
@@ -528,7 +530,14 @@ BEGIN
        OR NEW.id_usuario_ofertante = v_vendedor
        OR NEW.oferta_maxima <= IFNULL(OLD.oferta_maxima, 0) THEN
         SIGNAL SQLSTATE '45000';
+    else
+        insert into subastas_update_audit(id_subasta,id_ofertante_anterior,anterior_oferta) values(
+                new.id_publicacion,
+               old.id_usuario_ofertante,
+                old.oferta_maxima
+            );
     END IF;
+
 END$$
 
 DROP VIEW IF EXISTS preguntas_sin_responder$$
@@ -695,3 +704,5 @@ SET estado = 'CANCELADA'
 WHERE id_transaccion = 1
   AND estado = 'PENDIENTE';
 COMMIT;
+
+call ganador_subasta(51,@var)
