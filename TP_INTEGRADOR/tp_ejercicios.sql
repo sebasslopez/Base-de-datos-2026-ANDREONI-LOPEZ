@@ -357,8 +357,8 @@ BEGIN
        AND TRIM(p_pregunta) <> ''
        AND p_id_usuario <> v_vendedor THEN
 
-        INSERT INTO preguntas(id_publicacion, id_usuario, pregunta)
-        VALUES(p_id_publicacion, p_id_usuario, p_pregunta);
+        INSERT INTO interaccion(id_publicacion,id_pregunta,id_usuario,interaccion,fecha_interaccion)
+        VALUES(p_id_publicacion,null, p_id_usuario, p_pregunta,current_timestamp);
 
         SET p_ok = 1;
     END IF;
@@ -366,38 +366,29 @@ END$$
 
 DROP PROCEDURE IF EXISTS estadisticas_vendedor$$
 CREATE PROCEDURE estadisticas_vendedor(
-    IN p_id_usuario INT,
-    OUT p_ok BOOLEAN
+    IN p_id_usuario INT
 )
 BEGIN
-    DECLARE v_existe INT DEFAULT 0;
+    declare cantActivas int default 0;
+    declare cantFinalizadas int default 0;
+    declare ventas int default 0;
+    declare Facturacion float default 0;
+    declare avgProductos int default 0;
+    declare preguntas int default 0;
 
-    SET p_ok = 0;
+    select count(*),avg(p.precio) into cantActivas,avgProductos from publicaciones p
+    where p.id_usuario_vendedor = p_id_usuario and p.estado = 'ACTIVA';
 
-    SELECT COUNT(*)
-    INTO v_existe
-    FROM usuarios
-    WHERE id_usuario = p_id_usuario;
+    select count(*) into cantFinalizadas from publicaciones p
+    where p.id_usuario_vendedor = p_id_usuario and p.estado = 'FINALIZADA';
 
-    IF v_existe = 1 THEN
-        SELECT
-            u.id_usuario,
-            SUM(IF(p.estado IN ('ACTIVA','PAUSADA','OBSERVADA'), 1, 0)) AS publicaciones_activas,
-            SUM(IF(p.estado = 'FINALIZADA', 1, 0)) AS publicaciones_finalizadas,
-            COUNT(DISTINCT IF(t.estado = 'CONCRETADA', t.id_transaccion, NULL)) AS ventas_totales,
-            IFNULL(SUM(IF(t.estado = 'CONCRETADA', t.monto, 0)), 0) AS facturacion_total,
-            IFNULL(AVG(p.precio), 0) AS precio_promedio_productos,
-            COUNT(DISTINCT q.id_pregunta) AS preguntas_recibidas,
-            tiempo_promedio_venta(p_id_usuario) AS tiempo_promedio_venta
-        FROM usuarios u
-        LEFT JOIN publicaciones p ON p.id_usuario_vendedor = u.id_usuario
-        LEFT JOIN transacciones t ON t.id_publicacion = p.id_publicacion
-        LEFT JOIN preguntas q ON q.id_publicacion = p.id_publicacion
-        WHERE u.id_usuario = p_id_usuario
-        GROUP BY u.id_usuario;
+    select sum(obtenerPreguntasDePublicacion(p.id_publicacion)) into preguntas from publicaciones p
+    where p.id_usuario_vendedor = p_id_usuario;
 
-        SET p_ok = 1;
-    END IF;
+    select count(*),sum(t.monto) into ventas,Facturacion from transacciones t
+    where t.id_usuario_vendedor = p_id_usuario and t.estado = 'CONCRETADA';
+
+    select cantActivas,cantActivas,ventas,Facturacion,avgProductos,preguntas,tiempo_promedio_venta(p_id_usuario);
 END$$
 
 DROP PROCEDURE IF EXISTS top_vendedores_mes$$
@@ -444,10 +435,9 @@ BEGIN
     FROM usuarios u
      JOIN publicaciones p ON p.id_usuario_vendedor = u.id_usuario
      JOIN productos pr ON pr.id_producto = p.id_producto
-     JOIN preguntas q ON q.id_publicacion = p.id_publicacion
-    LEFT JOIN respuestas r ON r.id_pregunta = q.id_pregunta
+     JOIN interaccion q ON q.id_publicacion = p.id_publicacion
     WHERE p.estado IN ('ACTIVA','OBSERVADA')
-      AND r.id_respuesta IS NULL
+      AND q.id_pregunta IS NOT NULL
     GROUP BY u.id_usuario, u.email, p.id_publicacion, pr.nombre;
 END$$
 
@@ -476,10 +466,10 @@ END$$
 
 DROP TRIGGER IF EXISTS preguntas_delete$$
 CREATE TRIGGER preguntas_delete
-BEFORE DELETE ON preguntas
+BEFORE DELETE ON interaccion
 FOR EACH ROW
 BEGIN
-    DELETE FROM respuestas
+    DELETE FROM interaccion
     WHERE id_pregunta = OLD.id_pregunta;
 END$$
 
@@ -542,18 +532,11 @@ END$$
 
 DROP VIEW IF EXISTS preguntas_sin_responder$$
 CREATE VIEW preguntas_sin_responder AS
-SELECT q.id_pregunta,
-       q.pregunta AS descripcion,
-       q.id_publicacion AS publicacion,
-       pr.nombre AS producto,
-       u.nombre AS usuario_que_respondio
-FROM preguntas q
- JOIN publicaciones p ON p.id_publicacion = q.id_publicacion
- JOIN productos pr ON pr.id_producto = p.id_producto
-LEFT JOIN respuestas r ON r.id_pregunta = q.id_pregunta
-LEFT JOIN usuarios u ON u.id_usuario = r.id_usuario_vendedor
-WHERE p.estado IN ('ACTIVA','OBSERVADA')
-  AND r.id_respuesta IS NULL$$
+select i.id_pregunta,i.interaccion,i.id_publicacion,pr.nombre,p.id_usuario_vendedor from interaccion i
+join publicaciones p on i.id_publicacion = p.id_publicacion
+join productos pr on pr.id_producto = p.id_producto
+where p.estado = 'ACTIVA' and i.id_pregunta is null and i.id_interaccion not in (select t.id_pregunta from interaccion t where t.id_pregunta is not NULL);
+
 
 DROP VIEW IF EXISTS top_categorias_semana$$
 CREATE VIEW top_categorias_semana AS
@@ -569,18 +552,9 @@ LIMIT 10$$
 
 DROP VIEW IF EXISTS publicaciones_tendencia$$
 CREATE VIEW publicaciones_tendencia AS
-SELECT p.id_publicacion,
-       pr.nombre AS producto,
-       COUNT(q.id_pregunta) AS cantidad_preguntas
-FROM publicaciones p
- JOIN productos pr ON pr.id_producto = p.id_producto
-LEFT JOIN preguntas q
-    ON q.id_publicacion = p.id_publicacion
-   AND DATE(q.fecha_pregunta) = CURDATE()
-WHERE p.estado IN ('ACTIVA','OBSERVADA')
-GROUP BY p.id_publicacion, pr.nombre
-HAVING COUNT(q.id_pregunta) > 0
-ORDER BY cantidad_preguntas DESC$$
+select * from publicaciones p
+where obtenerPreguntasDePublicacionHoy(p.id_publicacion) != 0
+order by obtenerPreguntasDePublicacionHoy(p.id_publicacion) desc;
 
 DROP VIEW IF EXISTS mejor_vendedor_categoria$$
 CREATE VIEW mejor_vendedor_categoria AS
@@ -695,14 +669,27 @@ WHERE id_publicacion = 1
 COMMIT;
 
 START TRANSACTION;
-SELECT id_transaccion, estado
-FROM transacciones
-WHERE id_transaccion = 1
-FOR UPDATE;
-UPDATE transacciones
-SET estado = 'CANCELADA'
-WHERE id_transaccion = 1
-  AND estado = 'PENDIENTE';
+    select * from publicaciones where id_publicacion = 1 for update;
+    select * from interaccion where id_publicacion = 1 for update;
+    select * from subastas where id_publicacion = 1 for update;
+    select * from subastas_update_audit where id_subasta = 1 for update;
+    select * from transacciones where id_publicacion = 1 for update;
+
+    delete from transacciones where id_publicacion = 1;
+    delete from subastas_update_audit where id_subasta = 1;
+    delete from subastas where id_publicacion = 1;
+    delete from interaccion where id_publicacion = 1;
+    delete from publicaciones where id_publicacion = 1;
 COMMIT;
 
+
+create function obtenerPreguntasDePublicacionHoy(id int)returns int deterministic
+    begin
+        return (select count(*) from interaccion where id_publicacion = id and fecha_interaccion = CURRENT_TIMESTAMP());
+    end;
+
+create function obtenerPreguntasDePublicacion(id int)returns int deterministic
+    begin
+        return (select count(*) from interaccion where id_publicacion = id);
+    end;
 call ganador_subasta(51,@var)

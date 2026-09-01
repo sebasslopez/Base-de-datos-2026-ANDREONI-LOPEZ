@@ -67,13 +67,14 @@ CREATE TABLE subastas_update_audit(
 CREATE TABLE interaccion (
     id_interaccion INT AUTO_INCREMENT PRIMARY KEY,
     id_publicacion INT NOT NULL,
-    id_pregunta INT,
+    id_pregunta INT, # puede ser null
     id_usuario INT NOT NULL,
     interaccion TEXT NOT NULL,
     fecha_interaccion DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_publicacion) REFERENCES publicaciones(id_publicacion),
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
+
 # sirve para mantener un historial de transacciones de un usuario o vendedor
 CREATE TABLE transacciones (
     id_transaccion INT AUTO_INCREMENT PRIMARY KEY,
@@ -103,3 +104,10 @@ CREATE TABLE calificaciones (
     CHECK (satisfaccion BETWEEN 0 AND 100),
     UNIQUE (id_transaccion, id_usuario_calificado)
 );
+
+create table notificaciones(
+    id_notificacion int auto_increment primary key,
+    id_destinatario int not null,
+    texto text not null,
+    foreign key (id_destinatario) references usuarios(id_usuario)
+)
