@@ -1,0 +1,8 @@
+{
+    "_id": 101,
+    "nombre": "Carlos",
+    "apellido": "López",
+    "email": "carlos.lopez@universidad.com",
+    "titulo": "Licenciado en Sistemas",
+    "materias_ids": [1, 2]
+}

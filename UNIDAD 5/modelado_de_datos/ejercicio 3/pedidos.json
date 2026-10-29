@@ -1,0 +1,7 @@
+{
+    "_id": 101,
+    "usuario_id": 1,
+    "fecha": "2026-10-10",
+    "productos": [501],
+    "monto_total": 38000
+  }

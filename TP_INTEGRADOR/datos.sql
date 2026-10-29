@@ -426,7 +426,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Table structure for table `usuarios`
+-- Table structure for table `usuarios.json`
 --
 
 DROP TABLE IF EXISTS `usuarios`;
@@ -450,7 +450,7 @@ CREATE TABLE `usuarios` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `usuarios`
+-- Dumping data for table `usuarios.json`
 --
 
 LOCK TABLES `usuarios` WRITE;

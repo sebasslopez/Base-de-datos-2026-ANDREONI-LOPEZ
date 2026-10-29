@@ -1,0 +1,9 @@
+{
+    "_id": 1,
+    "nombre": "Pedro",
+    "apellido": "García",
+    "dni": "30123456",
+    "fecha_nacimiento": "1985-06-20",
+    "telefono": "1123456789",
+    "historia_clinica_id": 101
+}

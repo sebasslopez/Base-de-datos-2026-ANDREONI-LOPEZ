@@ -1,0 +1,7 @@
+{
+    "_id": 1,
+    "nombre": "Base de Datos",
+    "codigo": "BD101",
+    "horas_semanales": 4,
+    "profesores_ids": [101, 102]
+}

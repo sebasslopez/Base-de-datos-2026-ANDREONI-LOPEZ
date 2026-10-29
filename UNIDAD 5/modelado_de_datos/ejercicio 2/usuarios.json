@@ -1,0 +1,13 @@
+{
+  "_id": 1,
+  "nombre": "Juan",
+  "apellido": "Perez",
+  "email": "jperez@gmail.com",
+  "clave": "123456789#",
+  "direcciones": [{
+      "calle": "Av. de los constituyentes",
+      "ciudad": "Buenos Aires",
+      "codigoPostal": "B4585",
+      "provincia": "Buenos Aires"
+  }]
+}
